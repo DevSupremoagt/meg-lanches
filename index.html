@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meg Lanches - Cardápio Online</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              wine: '#4a1224',
+              darkWine: '#350b18',
+              gold: '#f59e0b',
+              lightGold: '#fef3c7',
+              accent: '#d97706'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-brand-cursive {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+    }
+    /* Estilização suave da barra de rolagem */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-stone-100 text-stone-800 min-h-screen pb-28">
+
+  <!-- CABEÇALHO -->
+  <header class="bg-gradient-to-b from-brand-darkWine to-brand-wine text-white shadow-xl sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-4 py-5 flex flex-col items-center justify-center text-center relative">
+      <div class="inline-block border-2 border-brand-gold/60 rounded-2xl px-6 py-2 bg-black/20 backdrop-blur-sm mb-2 shadow-inner">
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-widest text-white uppercase drop-shadow-md">
+          M E G
+        </h1>
+        <p class="text-2xl md:text-3xl font-brand-cursive text-brand-gold -mt-1 font-bold">
+          Lanches
+        </p>
+      </div>
+      <p class="text-xs md:text-sm text-amber-200/90 font-medium flex items-center gap-2">
+        <i class="fa-solid fa-motorcycle text-brand-gold"></i> Entregamos no conforto da sua casa, peça já!
+      </p>
+
+      <!-- Botão de Carrinho no Header (para Desktop e Mobile) -->
+      <button onclick="toggleCart(true)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-brand-gold hover:bg-amber-400 text-brand-darkWine p-2.5 md:px-4 md:py-2.5 rounded-full font-bold flex items-center gap-2 shadow-lg transition active:scale-95">
+        <i class="fa-solid fa-cart-shopping text-lg"></i>
+        <span class="hidden md:inline text-sm">Ver Pedido</span>
+        <span id="header-cart-badge" class="bg-brand-darkWine text-white text-xs px-2 py-0.5 rounded-full font-extrabold hidden">0</span>
+      </button>
+    </div>
+
+    <!-- Navegação de Categorias rápida -->
+    <div class="border-t border-white/10 bg-black/15 overflow-x-auto py-2.5 px-4 scrollbar-none">
+      <div id="category-chips" class="max-w-4xl mx-auto flex gap-2 text-xs md:text-sm font-semibold whitespace-nowrap">
+        <!-- Renderizado dinamicamente via JS -->
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL (CARDÁPIO) -->
+  <main class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Aviso de Funcionamento -->
+    <div class="bg-amber-50 border-l-4 border-brand-gold p-3 rounded-r-lg mb-6 shadow-sm flex items-center justify-between text-xs md:text-sm text-stone-700">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Estamos abertos e recebendo pedidos!</span>
+      </div>
+      <span class="font-bold text-brand-wine">Taxa Delivery: R$ 2,00</span>
+    </div>
+
+    <!-- Container dos Produtos por Categoria -->
+    <div id="menu-container" class="space-y-8">
+      <!-- Inserido dinamicamente pelo JavaScript -->
+    </div>
+  </main>
+
+  <!-- BOTÃO FLUTUANTE DO CARRINHO (MOBILE & DESKTOP) -->
+  <div id="floating-cart-container" class="fixed bottom-5 left-0 right-0 z-40 px-4 max-w-md mx-auto pointer-events-none transition-all duration-300 transform translate-y-24 opacity-0">
+    <button onclick="toggleCart(true)" class="w-full bg-brand-wine hover:bg-brand-darkWine text-white shadow-2xl rounded-2xl p-3.5 flex items-center justify-between pointer-events-auto border-2 border-brand-gold transition active:scale-[0.98]">
+      <div class="flex items-center gap-3">
+        <div class="relative bg-brand-gold text-brand-darkWine w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow">
+          <i class="fa-solid fa-basket-shopping"></i>
+          <span id="floating-cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+        </div>
+        <div class="text-left">
+          <p class="text-xs text-amber-200 uppercase font-bold tracking-wider">Meu Pedido</p>
+          <p id="floating-cart-items-text" class="text-sm font-semibold text-white">0 itens</p>
+        </div>
+      </div>
+      <div class="text-right flex items-center gap-2">
+        <span id="floating-cart-total" class="text-lg font-black text-brand-gold">R$ 0,00</span>
+        <i class="fa-solid fa-chevron-right text-xs text-amber-200"></i>
+      </div>
+    </button>
+  </div>
+
+  <!-- OVERLAY / BACKDROP DO CARRINHO -->
+  <div id="cart-backdrop" onclick="toggleCart(false)" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <!-- GAVETA LATERAL DO CARRINHO (DRAWER) -->
+  <aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-lg bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <!-- Cabeçalho do Carrinho -->
+    <div class="p-4 bg-brand-wine text-white flex items-center justify-between border-b border-white/10 shadow">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-cart-shopping text-brand-gold text-lg"></i>
+        <h2 class="text-lg font-bold">Seu Pedido</h2>
+      </div>
+      <button onclick="toggleCart(false)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition" aria-label="Fechar carrinho">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Lista de Itens do Carrinho -->
+    <div id="cart-items-container" class="flex-1 overflow-y-auto p-4 divide-y divide-stone-200">
+      <!-- Itens renderizados aqui via JS -->
+    </div>
+
+    <!-- Rodapé & Formulário de Checkout -->
+    <div id="cart-footer" class="border-t border-stone-200 bg-stone-50 p-4 max-h-[60vh] overflow-y-auto">
+      <!-- Formulário de Dados -->
+      <form id="order-form" onsubmit="handleSendWhatsApp(event)" class="space-y-4">
+        <!-- Identificação -->
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Seu Nome *</label>
+          <input type="text" id="customer-name" required placeholder="Como podemos te chamar?" class="w-full px-3 py-2 text-sm bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold">
+        </div>
+
+        <!-- Tipo de Entrega -->
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Como deseja receber? *</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2.5 bg-white border border-stone-300 rounded-lg cursor-pointer hover:border-brand-gold has-[:checked]:border-brand-gold has-[:checked]:bg-amber-50/60 has-[:checked]:ring-1 has-[:checked]:ring-brand-gold transition">
+              <input type="radio" name="delivery-type" value="balcao" checked onchange="handleDeliveryChange()" class="text-brand-wine focus:ring-brand-gold">
+              <div>
+                <span class="block text-xs font-bold text-stone-800">Retirada</span>
+                <span class="block text-[11px] text-stone-500">Grátis (R$ 0,00)</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-white border border-stone-300 rounded-lg cursor-pointer hover:border-brand-gold has-[:checked]:border-brand-gold has-[:checked]:bg-amber-50/60 has-[:checked]:ring-1 has-[:checked]:ring-brand-gold transition">
+              <input type="radio" name="delivery-type" value="delivery" onchange="handleDeliveryChange()" class="text-brand-wine focus:ring-brand-gold">
+              <div>
+                <span class="block text-xs font-bold text-stone-800">Delivery</span>
+                <span class="block text-[11px] text-emerald-600 font-semibold">+ R$ 2,00 taxa</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Campos de Endereço (Aparecem somente se Delivery) -->
+        <div id="address-fields" class="space-y-2 hidden p-3 bg-amber-50/60 rounded-xl border border-amber-200">
+          <p class="text-xs font-bold text-brand-wine flex items-center gap-1.5">
+            <i class="fa-solid fa-location-dot"></i> Dados de Entrega
+          </p>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="col-span-2">
+              <input type="text" id="address-street" placeholder="Rua / Avenida *" class="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold">
+            </div>
+            <div>
+              <input type="text" id="address-number" placeholder="Nº *" class="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="address-neighborhood" placeholder="Bairro *" class="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold">
+            <input type="text" id="address-reference" placeholder="Ponto de Ref. *" class="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold">
+          </div>
+        </div>
+
+        <!-- Forma de Pagamento -->
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Forma de Pagamento *</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2.5 bg-white border border-stone-300 rounded-lg cursor-pointer hover:border-brand-gold has-[:checked]:border-brand-gold has-[:checked]:bg-amber-50/60 has-[:checked]:ring-1 has-[:checked]:ring-brand-gold transition">
+              <input type="radio" name="payment-method" value="PIX" checked onchange="handlePaymentChange()" class="text-brand-wine focus:ring-brand-gold">
+              <span class="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                <i class="fa-brands fa-pix text-emerald-600"></i> PIX
+              </span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-white border border-stone-300 rounded-lg cursor-pointer hover:border-brand-gold has-[:checked]:border-brand-gold has-[:checked]:bg-amber-50/60 has-[:checked]:ring-1 has-[:checked]:ring-brand-gold transition">
+              <input type="radio" name="payment-method" value="Dinheiro" onchange="handlePaymentChange()" class="text-brand-wine focus:ring-brand-gold">
+              <span class="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-money-bill-wave text-emerald-600"></i> Dinheiro
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Troco para Dinheiro -->
+        <div id="change-field-container" class="hidden">
+          <label class="block text-xs font-semibold text-stone-600 mb-1">Precisa de troco para quanto? (Opcional)</label>
+          <input type="text" id="payment-change" placeholder="Ex: R$ 50,00 ou Não preciso" class="w-full px-3 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold">
+        </div>
+
+        <!-- Observações do Pedido -->
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Observações do Pedido</label>
+          <textarea id="order-notes" rows="2" placeholder="Ex: Tirar cebola, caprichar no molho, mandar maionese extra..." class="w-full px-3 py-2 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold"></textarea>
+        </div>
+
+        <!-- Resumo Financeiro -->
+        <div class="space-y-1.5 py-3 border-y border-stone-200 text-xs">
+          <div class="flex justify-between text-stone-600">
+            <span>Subtotal dos produtos:</span>
+            <span id="cart-subtotal" class="font-semibold text-stone-800">R$ 0,00</span>
+          </div>
+          <div class="flex justify-between text-stone-600">
+            <span>Taxa de entrega:</span>
+            <span id="cart-delivery-fee" class="font-semibold text-stone-800">R$ 0,00</span>
+          </div>
+          <div class="flex justify-between text-base font-extrabold text-brand-darkWine pt-1">
+            <span>Total a pagar:</span>
+            <span id="cart-grand-total" class="text-brand-wine text-lg">R$ 0,00</span>
+          </div>
+        </div>
+
+        <!-- Botão Finalizar -->
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition active:scale-[0.98]">
+          <i class="fa-brands fa-whatsapp text-xl"></i>
+          <span>Enviar Pedido pelo WhatsApp</span>
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- JAVASCRIPT: DADOS E COMPORTAMENTO -->
+  <script>
+    // ==========================================
+    // 1. CONFIGURAÇÕES & DADOS DO CARDÁPIO (EXTRAÍDOS DO CARDÁPIO)
+    // ==========================================
+    
+    // Substitua pelo seu WhatsApp com DDD (apenas dígitos, ex: 5583993091285)
+    // Deixamos configurado provisoriamente para testes:
+    const WHATSAPP_NUMBER = "5583993535222"; 
+    const DELIVERY_FEE = 2.00;
+
+    const MENU_PRODUCTS = [
+      // --- PASTÉIS ---
+      { id: "pas-1", category: "Pastéis", name: "Pastel de Queijo", description: "Pastel frito na hora com recheio generoso de queijo derretido.", price: 4.00, icon: "fa-solid fa-stroopwafel" },
+      { id: "pas-2", category: "Pastéis", name: "Pastel de Queijo e Presunto", description: "Clássico pastel crocante recheado de queijo com presunto.", price: 4.00, icon: "fa-solid fa-stroopwafel" },
+      { id: "pas-3", category: "Pastéis", name: "Pastel de Carne", description: "Carne moída temperada com especiarias da casa.", price: 4.00, icon: "fa-solid fa-stroopwafel" },
+      { id: "pas-4", category: "Pastéis", name: "Pastel de Frango", description: "Frango desfiado suculento e bem temperadinho.", price: 4.00, icon: "fa-solid fa-stroopwafel" },
+      { id: "pas-5", category: "Pastéis", name: "Pastel de Frango com Cheddar", description: "Frango desfiado com delicioso e cremoso queijo cheddar.", price: 4.00, icon: "fa-solid fa-stroopwafel" },
+
+      // --- RISOLE ---
+      { id: "ris-1", category: "Risoles", name: "Risole de Queijo", description: "Massa macia e empanada bem douradinha com queijo derretido.", price: 4.00, icon: "fa-solid fa-bread-slice" },
+      { id: "ris-2", category: "Risoles", name: "Risole de Queijo e Presunto", description: "Massa crocante com recheio saboroso de queijo e presunto.", price: 4.00, icon: "fa-solid fa-bread-slice" },
+      { id: "ris-3", category: "Risoles", name: "Risole de Carne", description: "Massa empanada com recheio caprichado de carne.", price: 4.00, icon: "fa-solid fa-bread-slice" },
+
+      // --- EMPADAS SALGADAS ---
+      { id: "emp-1", category: "Empadas Salgadas", name: "Empada de Queijo", description: "Massa podre que derrete na boca com recheio de queijo.", price: 4.00, icon: "fa-solid fa-cookie" },
+      { id: "emp-2", category: "Empadas Salgadas", name: "Empada de Frango", description: "Empada artesanal recheada com frango desfiado temperado.", price: 4.00, icon: "fa-solid fa-cookie" },
+
+      // --- SALGADOS & LANCHES ---
+      { id: "sal-1", category: "Lanches & Salgados", name: "Coxinha", description: "A queridinha da casa, massa saborosa com frango e crosta crocante.", price: 4.00, icon: "fa-solid fa-drumstick-bite" },
+      { id: "sal-2", category: "Lanches & Salgados", name: "Enroladinho", description: "Enroladinho assado/frito bem recheado e saboroso.", price: 4.00, icon: "fa-solid fa-hotdog" },
+      { id: "sal-3", category: "Lanches & Salgados", name: "Cachorro Quente", description: "Pão fofinho, salsicha suculenta, molho especial e acompanhamentos.", price: 6.00, icon: "fa-solid fa-hotdog" },
+      { id: "sal-4", category: "Lanches & Salgados", name: "Hambúrguer", description: "Pão de hambúrguer, blend especial, queijo e montagem caprichada.", price: 7.00, icon: "fa-solid fa-burger" },
+
+      // --- DOCES (EMPADAS, TORTAS & AÇAÍ) ---
+      { id: "doc-1", category: "Doces & Sobremesas", name: "Empada Doce de Leite", description: "Empadinha doce com recheio cremoso de doce de leite.", price: 4.00, icon: "fa-solid fa-pie" },
+      { id: "doc-2", category: "Doces & Sobremesas", name: "Empada de Chocolate", description: "Empadinha doce com muito recheio de chocolate.", price: 4.00, icon: "fa-solid fa-pie" },
+      { id: "doc-3", category: "Doces & Sobremesas", name: "Torta de Chocolate", description: "Fatia caprichada de torta sabor chocolate macia e saborosa.", price: 6.00, icon: "fa-solid fa-cake-candles" },
+      { id: "doc-4", category: "Doces & Sobremesas", name: "Torta de Limão", description: "Fatia refrescante com creme de limão e cobertura irresistível.", price: 6.00, icon: "fa-solid fa-cake-candles" },
+      { id: "doc-5", category: "Doces & Sobremesas", name: "Açaí 300 ml", description: "Açaí cremoso e refrescante no copo de 300ml.", price: 6.00, icon: "fa-solid fa-bowl-food" },
+      { id: "doc-6", category: "Doces & Sobremesas", name: "Açaí 400 ml", description: "Açaí geladinho e batido no ponto ideal no copo de 400ml.", price: 8.00, icon: "fa-solid fa-bowl-food" },
+      { id: "doc-7", category: "Doces & Sobremesas", name: "Açaí 500 ml", description: "Porção generosa de 500ml de açaí puro sabor e energia.", price: 12.00, icon: "fa-solid fa-bowl-food" },
+
+      // --- BEBIDAS ---
+      { id: "beb-1", category: "Bebidas", name: "Coca Cola 1L", description: "Garrafa de 1 Litro bem gelada.", price: 8.00, icon: "fa-solid fa-bottle-droplet" },
+      { id: "beb-2", category: "Bebidas", name: "Fanta 1L", description: "Garrafa de 1 Litro de Fanta geladinha.", price: 8.00, icon: "fa-solid fa-bottle-droplet" },
+      { id: "beb-3", category: "Bebidas", name: "Guaraná 1L", description: "Garrafa de 1 Litro sabor guaraná.", price: 7.00, icon: "fa-solid fa-bottle-droplet" },
+      { id: "beb-4", category: "Bebidas", name: "Coca Cola 2L", description: "Garrafa tamanho família de 2 Litros.", price: 15.00, icon: "fa-solid fa-bottle-droplet" },
+      { id: "beb-5", category: "Bebidas", name: "Guaraná 2L", description: "Garrafa tamanho família de 2 Litros.", price: 14.00, icon: "fa-solid fa-bottle-droplet" },
+      { id: "beb-6", category: "Bebidas", name: "Coca Cola Lata", description: "Refrigerante em lata 350ml trincando de gelado.", price: 4.50, icon: "fa-solid fa-wine-bottle" },
+      { id: "beb-7", category: "Bebidas", name: "Guaraná Lata", description: "Refrigerante em lata 350ml bem gelado.", price: 4.50, icon: "fa-solid fa-wine-bottle" },
+      { id: "beb-8", category: "Bebidas", name: "Fanta Lata", description: "Refrigerante em lata 350ml refrescante.", price: 4.50, icon: "fa-solid fa-wine-bottle" },
+      { id: "beb-9", category: "Bebidas", name: "Guaraná Indaiá 250ml", description: "Guaraná regional tamanho individual 250ml.", price: 2.50, icon: "fa-solid fa-wine-bottle" }
+    ];
+
+    // ==========================================
+    // 2. ESTADO DO APLICATIVO & LOCALSTORAGE
+    // ==========================================
+    let cart = [];
+
+    function loadCartFromStorage() {
+      try {
+        const saved = localStorage.getItem('meg_lanches_cart');
+        if (saved) {
+          cart = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error("Erro ao carregar carrinho:", e);
+        cart = [];
+      }
+    }
+
+    function saveCartToStorage() {
+      try {
+        localStorage.setItem('meg_lanches_cart', JSON.stringify(cart));
+      } catch (e) {
+        console.error("Erro ao salvar carrinho:", e);
+      }
+    }
+
+    function formatCurrency(val) {
+      return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // ==========================================
+    // 3. RENDERIZAÇÃO DO CARDÁPIO
+    // ==========================================
+    function renderMenu() {
+      const menuContainer = document.getElementById('menu-container');
+      const categoryChips = document.getElementById('category-chips');
+      menuContainer.innerHTML = '';
+      categoryChips.innerHTML = '';
+
+      // Agrupar produtos por categoria
+      const categories = [...new Set(MENU_PRODUCTS.map(p => p.category))];
+
+      categories.forEach((cat, index) => {
+        // Âncora / Botão rápido no Header
+        const chip = document.createElement('a');
+        chip.href = `#cat-${index}`;
+        chip.className = "px-3 py-1 rounded-full bg-white/10 hover:bg-brand-gold hover:text-brand-darkWine text-amber-100 transition-colors cursor-pointer border border-white/15";
+        chip.textContent = cat;
+        categoryChips.appendChild(chip);
+
+        // Bloco da Categoria
+        const catSection = document.createElement('section');
+        catSection.id = `cat-${index}`;
+        catSection.className = "scroll-mt-36";
+
+        const catTitle = document.createElement('div');
+        catTitle.className = "flex items-center gap-3 mb-4 pb-2 border-b-2 border-brand-gold/40";
+        catTitle.innerHTML = `
+          <h2 class="text-xl md:text-2xl font-extrabold text-brand-darkWine tracking-tight uppercase">${cat}</h2>
+          <span class="text-xs bg-brand-lightGold text-brand-wine px-2 py-0.5 rounded-full font-bold">
+            ${MENU_PRODUCTS.filter(p => p.category === cat).length} opções
+          </span>
+        `;
+        catSection.appendChild(catTitle);
+
+        // Grid de Produtos
+        const grid = document.createElement('div');
+        grid.className = "grid grid-cols-1 md:grid-cols-2 gap-3.5";
+
+        const products = MENU_PRODUCTS.filter(p => p.category === cat);
+        products.forEach(product => {
+          const card = document.createElement('div');
+          card.className = "bg-white rounded-2xl p-4 shadow-sm hover:shadow-md border border-stone-200/80 transition flex flex-col justify-between";
+          card.innerHTML = `
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex-1">
+                <h3 class="font-bold text-stone-900 text-base leading-tight">${product.name}</h3>
+                <p class="text-xs text-stone-500 mt-1 leading-relaxed">${product.description}</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-brand-wine flex items-center justify-center shrink-0 border border-amber-200/60">
+                <i class="${product.icon} text-lg"></i>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-stone-100 mt-1">
+              <span class="text-base font-extrabold text-brand-darkWine">${formatCurrency(product.price)}</span>
+              <button onclick="addToCart('${product.id}')" class="bg-brand-wine hover:bg-brand-darkWine text-white text-xs font-bold py-2 px-3.5 rounded-xl flex items-center gap-1.5 shadow transition active:scale-95">
+                <i class="fa-solid fa-plus text-brand-gold"></i>
+                <span>Adicionar</span>
+              </button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        catSection.appendChild(grid);
+        menuContainer.appendChild(catSection);
+      });
+    }
+
+    // ==========================================
+    // 4. LÓGICA DO CARRINHO
+    // ==========================================
+    function addToCart(productId) {
+      const item = MENU_PRODUCTS.find(p => p.id === productId);
+      if (!item) return;
+
+      const existingIndex = cart.findIndex(c => c.id === productId);
+      if (existingIndex > -1) {
+        cart[existingIndex].quantity += 1;
+      } else {
+        cart.push({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: 1
+        });
+      }
+
+      saveCartToStorage();
+      updateCartUI();
+
+      // Feedback animado sutil
+      showAddedToast(item.name);
+    }
+
+    function updateQuantity(productId, delta) {
+      const index = cart.findIndex(c => c.id === productId);
+      if (index === -1) return;
+
+      cart[index].quantity += delta;
+      if (cart[index].quantity <= 0) {
+        cart.splice(index, 1);
+      }
+
+      saveCartToStorage();
+      updateCartUI();
+    }
+
+    function removeItem(productId) {
+      cart = cart.filter(c => c.id !== productId);
+      saveCartToStorage();
+      updateCartUI();
+    }
+
+    function getSubtotal() {
+      return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+
+    function getDeliveryFee() {
+      const isDelivery = document.querySelector('input[name="delivery-type"]:checked')?.value === 'delivery';
+      return isDelivery ? DELIVERY_FEE : 0.00;
+    }
+
+    function getTotal() {
+      return getSubtotal() + getDeliveryFee();
+    }
+
+    function updateCartUI() {
+      const totalItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const subtotal = getSubtotal();
+      const deliveryFee = getDeliveryFee();
+      const total = getTotal();
+
+      // Badges e contadores
+      const headerBadge = document.getElementById('header-cart-badge');
+      if (totalItemsCount > 0) {
+        headerBadge.textContent = totalItemsCount;
+        headerBadge.classList.remove('hidden');
+      } else {
+        headerBadge.classList.add('hidden');
+      }
+
+      // Barra flutuante inferior
+      const floatContainer = document.getElementById('floating-cart-container');
+      const floatCount = document.getElementById('floating-cart-count');
+      const floatText = document.getElementById('floating-cart-items-text');
+      const floatTotal = document.getElementById('floating-cart-total');
+
+      if (totalItemsCount > 0) {
+        floatCount.textContent = totalItemsCount;
+        floatText.textContent = `${totalItemsCount} ${totalItemsCount === 1 ? 'item' : 'itens'}`;
+        floatTotal.textContent = formatCurrency(total);
+        floatContainer.classList.remove('translate-y-24', 'opacity-0');
+      } else {
+        floatContainer.classList.add('translate-y-24', 'opacity-0');
+      }
+
+      // Renderizar itens dentro da gaveta
+      const itemsContainer = document.getElementById('cart-items-container');
+      const cartFooter = document.getElementById('cart-footer');
+
+      if (cart.length === 0) {
+        itemsContainer.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center p-8 text-stone-400">
+            <i class="fa-solid fa-basket-shopping text-5xl mb-3 text-stone-300"></i>
+            <p class="font-bold text-stone-700 text-base">Seu carrinho está vazio</p>
+            <p class="text-xs text-stone-500 mt-1 max-w-xs">Adicione seus lanches, pastéis ou doces favoritos para fazer o pedido.</p>
+          </div>
+        `;
+        cartFooter.classList.add('opacity-50', 'pointer-events-none');
+      } else {
+        cartFooter.classList.remove('opacity-50', 'pointer-events-none');
+        itemsContainer.innerHTML = '';
+
+        cart.forEach(item => {
+          const itemEl = document.createElement('div');
+          itemEl.className = "py-3 flex items-center justify-between gap-3";
+          itemEl.innerHTML = `
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold text-sm text-stone-900 truncate">${item.name}</h4>
+              <p class="text-xs text-stone-500">${formatCurrency(item.price)} un. • <strong class="text-brand-wine">${formatCurrency(item.price * item.quantity)}</strong></p>
+            </div>
+            <!-- Controles de Quantidade -->
+            <div class="flex items-center gap-1 bg-stone-100 rounded-lg p-1 border border-stone-200">
+              <button onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 rounded flex items-center justify-center text-stone-600 hover:bg-white active:scale-95 transition" title="Diminuir">
+                <i class="fa-solid fa-minus text-xs"></i>
+              </button>
+              <span class="w-6 text-center text-xs font-bold text-stone-800">${item.quantity}</span>
+              <button onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 rounded flex items-center justify-center text-stone-600 hover:bg-white active:scale-95 transition" title="Aumentar">
+                <i class="fa-solid fa-plus text-xs"></i>
+              </button>
+            </div>
+            <!-- Excluir -->
+            <button onclick="removeItem('${item.id}')" class="text-stone-400 hover:text-red-500 p-1 transition" title="Excluir item">
+              <i class="fa-solid fa-trash-can text-sm"></i>
+            </button>
+          `;
+          itemsContainer.appendChild(itemEl);
+        });
+      }
+
+      // Atualizar totais no checkout
+      document.getElementById('cart-subtotal').textContent = formatCurrency(subtotal);
+      document.getElementById('cart-delivery-fee').textContent = formatCurrency(deliveryFee);
+      document.getElementById('cart-grand-total').textContent = formatCurrency(total);
+    }
+
+    // ==========================================
+    // 5. COMPORTAMENTOS DA GAVETA & FORMULÁRIOS
+    // ==========================================
+    function toggleCart(open) {
+      const drawer = document.getElementById('cart-drawer');
+      const backdrop = document.getElementById('cart-backdrop');
+
+      if (open) {
+        drawer.classList.remove('translate-x-full');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = 'hidden';
+      } else {
+        drawer.classList.add('translate-x-full');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function handleDeliveryChange() {
+      const deliveryType = document.querySelector('input[name="delivery-type"]:checked').value;
+      const addressBox = document.getElementById('address-fields');
+      const streetInput = document.getElementById('address-street');
+      const numberInput = document.getElementById('address-number');
+      const neighborhoodInput = document.getElementById('address-neighborhood');
+      const referenceInput = document.getElementById('address-reference');
+
+      if (deliveryType === 'delivery') {
+        addressBox.classList.remove('hidden');
+        streetInput.required = true;
+        numberInput.required = true;
+        neighborhoodInput.required = true;
+        referenceInput.required = true;
+      } else {
+        addressBox.classList.add('hidden');
+        streetInput.required = false;
+        numberInput.required = false;
+        neighborhoodInput.required = false;
+        referenceInput.required = false;
+      }
+
+      updateCartUI();
+    }
+
+    function handlePaymentChange() {
+      const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+      const changeBox = document.getElementById('change-field-container');
+
+      if (paymentMethod === 'Dinheiro') {
+        changeBox.classList.remove('hidden');
+      } else {
+        changeBox.classList.add('hidden');
+      }
+    }
+
+    // ==========================================
+    // 6. FINALIZAÇÃO VIA WHATSAPP
+    // ==========================================
+    function handleSendWhatsApp(e) {
+      e.preventDefault();
+
+      if (cart.length === 0) {
+        alert("Seu carrinho está vazio! Selecione itens antes de finalizar.");
+        return;
+      }
+
+      const customerName = document.getElementById('customer-name').value.trim();
+      const deliveryType = document.querySelector('input[name="delivery-type"]:checked').value;
+      const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+      const changeFor = document.getElementById('payment-change').value.trim();
+      const notes = document.getElementById('order-notes').value.trim();
+
+      // Validação de endereço se delivery
+      let street = '', number = '', neighborhood = '', reference = '';
+      if (deliveryType === 'delivery') {
+        street = document.getElementById('address-street').value.trim();
+        number = document.getElementById('address-number').value.trim();
+        neighborhood = document.getElementById('address-neighborhood').value.trim();
+        reference = document.getElementById('address-reference').value.trim();
+
+        if (!street || !number || !neighborhood || !reference) {
+          alert("Por favor, preencha todos os campos obrigatórios do endereço para entrega.");
+          return;
+        }
+      }
+
+      // Montagem da mensagem formatada para WhatsApp
+      let msg = `🍔 *NOVO PEDIDO - MEG LANCHES*\n`;
+      msg += `----------------------------------------\n`;
+      msg += `👤 *Cliente:* ${customerName}\n\n`;
+
+      msg += `📋 *ITENS DO PEDIDO:*\n`;
+      cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        msg += `${index + 1}. *${item.quantity}x* ${item.name} (${formatCurrency(item.price)} un) = ${formatCurrency(itemTotal)}\n`;
+      });
+
+      msg += `\n💰 *VALORES:*\n`;
+      msg += `• Subtotal: ${formatCurrency(getSubtotal())}\n`;
+      msg += `• Tipo de Entrega: *${deliveryType === 'delivery' ? 'Delivery' : 'Retirada no Balcão'}*\n`;
+      if (deliveryType === 'delivery') {
+        msg += `• Taxa de Entrega: ${formatCurrency(DELIVERY_FEE)}\n`;
+      }
+      msg += `• *TOTAL FINAL: ${formatCurrency(getTotal())}*\n\n`;
+
+      msg += `📍 *ENTREGA / RETIRADA:*\n`;
+      if (deliveryType === 'delivery') {
+        msg += `• Endereço: ${street}, Nº ${number}\n`;
+        msg += `• Bairro: ${neighborhood}\n`;
+        msg += `• Ponto de Referência: ${reference}\n`;
+      } else {
+        msg += `• Opção: Retirada no balcão\n`;
+      }
+
+      msg += `\n💳 *FORMA DE PAGAMENTO:*\n`;
+      msg += `• Pagamento: *${paymentMethod}*\n`;
+      if (paymentMethod === 'Dinheiro' && changeFor) {
+        msg += `• Troco para: ${changeFor}\n`;
+      }
+
+      if (notes) {
+        msg += `\n📝 *OBSERVAÇÕES:*\n${notes}\n`;
+      }
+
+      msg += `----------------------------------------\n`;
+      msg += `_Pedido gerado automaticamente pelo cardápio online_ 🚀`;
+
+      // Codificação para URL
+      const encodedMsg = encodeURIComponent(msg);
+      const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`;
+
+      // Abrir WhatsApp em nova aba
+      window.open(url, '_blank');
+    }
+
+    // Feedback visual quando adiciona ao carrinho
+    function showAddedToast(name) {
+      const toast = document.createElement('div');
+      toast.className = "fixed top-20 left-1/2 -translate-x-1/2 bg-brand-darkWine text-amber-200 border border-brand-gold text-xs font-bold px-4 py-2 rounded-full shadow-2xl z-50 transition-all duration-300 transform -translate-y-4 opacity-0 flex items-center gap-2";
+      toast.innerHTML = `<i class="fa-solid fa-circle-check text-brand-gold"></i> <span>"${name}" adicionado!</span>`;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('-translate-y-4', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('-translate-y-4', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 1800);
+    }
+
+    // Inicialização ao carregar página
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCartFromStorage();
+      renderMenu();
+      updateCartUI();
+    });
+  </script>
+</body>
+</html>
+
