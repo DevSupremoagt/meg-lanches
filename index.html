@@ -179,21 +179,10 @@
 
         <!-- Campos de Endereço (Aparecem somente se Delivery) -->
         <div id="address-fields" class="space-y-2 hidden p-3 bg-amber-50/60 rounded-xl border border-amber-200">
-          <p class="text-xs font-bold text-brand-wine flex items-center gap-1.5">
-            <i class="fa-solid fa-location-dot"></i> Dados de Entrega
-          </p>
-          <div class="grid grid-cols-3 gap-2">
-            <div class="col-span-2">
-              <input type="text" id="address-street" placeholder="Rua / Avenida *" class="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold">
-            </div>
-            <div>
-              <input type="text" id="address-number" placeholder="Nº *" class="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold">
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <input type="text" id="address-neighborhood" placeholder="Bairro *" class="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold">
-            <input type="text" id="address-reference" placeholder="Ponto de Ref. *" class="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-brand-gold">
-          </div>
+          <label for="delivery-address" class="text-xs font-bold text-brand-wine flex items-center gap-1.5">
+            <i class="fa-solid fa-location-dot"></i> Endereço para Entrega *
+          </label>
+          <textarea id="delivery-address" rows="2" placeholder="Ex: Casa amarela perto do mercadinho de Basto..." class="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold"></textarea>
         </div>
 
         <!-- Forma de Pagamento -->
@@ -291,6 +280,7 @@
       { id: "doc-2", category: "Doces & Sobremesas", name: "Empada de Chocolate", description: "Empadinha doce com muito recheio de chocolate.", price: 4.00, icon: "fa-solid fa-pie" },
       { id: "doc-3", category: "Doces & Sobremesas", name: "Torta de Chocolate", description: "Fatia caprichada de torta sabor chocolate macia e saborosa.", price: 6.00, icon: "fa-solid fa-cake-candles" },
       { id: "doc-4", category: "Doces & Sobremesas", name: "Torta de Limão", description: "Fatia refrescante com creme de limão e cobertura irresistível.", price: 6.00, icon: "fa-solid fa-cake-candles" },
+      { id: "doc-8", category: "Doces & Sobremesas", name: "Torta de Maracujá", description: "Fatia deliciosa com creme especial de maracujá e cobertura irresistível.", price: 6.00, icon: "fa-solid fa-cake-candles" },
       { id: "doc-5", category: "Doces & Sobremesas", name: "Açaí 300 ml", description: "Açaí cremoso e refrescante no copo de 300ml.", price: 6.00, icon: "fa-solid fa-bowl-food" },
       { id: "doc-6", category: "Doces & Sobremesas", name: "Açaí 400 ml", description: "Açaí geladinho e batido no ponto ideal no copo de 400ml.", price: 8.00, icon: "fa-solid fa-bowl-food" },
       { id: "doc-7", category: "Doces & Sobremesas", name: "Açaí 500 ml", description: "Porção generosa de 500ml de açaí puro sabor e energia.", price: 12.00, icon: "fa-solid fa-bowl-food" },
@@ -564,23 +554,14 @@
     function handleDeliveryChange() {
       const deliveryType = document.querySelector('input[name="delivery-type"]:checked').value;
       const addressBox = document.getElementById('address-fields');
-      const streetInput = document.getElementById('address-street');
-      const numberInput = document.getElementById('address-number');
-      const neighborhoodInput = document.getElementById('address-neighborhood');
-      const referenceInput = document.getElementById('address-reference');
+      const addressInput = document.getElementById('delivery-address');
 
       if (deliveryType === 'delivery') {
         addressBox.classList.remove('hidden');
-        streetInput.required = true;
-        numberInput.required = true;
-        neighborhoodInput.required = true;
-        referenceInput.required = true;
+        addressInput.required = true;
       } else {
         addressBox.classList.add('hidden');
-        streetInput.required = false;
-        numberInput.required = false;
-        neighborhoodInput.required = false;
-        referenceInput.required = false;
+        addressInput.required = false;
       }
 
       updateCartUI();
@@ -615,15 +596,12 @@
       const notes = document.getElementById('order-notes').value.trim();
 
       // Validação de endereço se delivery
-      let street = '', number = '', neighborhood = '', reference = '';
+      let deliveryAddress = '';
       if (deliveryType === 'delivery') {
-        street = document.getElementById('address-street').value.trim();
-        number = document.getElementById('address-number').value.trim();
-        neighborhood = document.getElementById('address-neighborhood').value.trim();
-        reference = document.getElementById('address-reference').value.trim();
+        deliveryAddress = document.getElementById('delivery-address').value.trim();
 
-        if (!street || !number || !neighborhood || !reference) {
-          alert("Por favor, preencha todos os campos obrigatórios do endereço para entrega.");
+        if (!deliveryAddress) {
+          alert("Por favor, preencha o campo de endereço para entrega.");
           return;
         }
       }
@@ -649,9 +627,7 @@
 
       msg += `📍 *ENTREGA / RETIRADA:*\n`;
       if (deliveryType === 'delivery') {
-        msg += `• Endereço: ${street}, Nº ${number}\n`;
-        msg += `• Bairro: ${neighborhood}\n`;
-        msg += `• Ponto de Referência: ${reference}\n`;
+        msg += `• Endereço: ${deliveryAddress}\n`;
       } else {
         msg += `• Opção: Retirada no balcão\n`;
       }
